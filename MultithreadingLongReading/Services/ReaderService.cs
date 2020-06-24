@@ -6,6 +6,7 @@ namespace MultithreadingLongReading.Services
     public static class ReaderService
     {
         private static string _file;
+        private static object _locker;
 
         public static string ReadFile()
         {
@@ -15,14 +16,24 @@ namespace MultithreadingLongReading.Services
         
         public static string ReadFileWithLock()
         {
-            var file = new List<byte>();
-            // Вернуть в оба потока надо
-            var locker = new object();
-            lock (locker)
+            // Вернуть в оба потока надо, посмотреть про именованный семафор, zookeeper, webdav
+            if (Monitor.TryEnter(_locker))
             {
-                _file = 
-                Thread.Sleep(20000);
-                return $"Hello from thread {Thread.CurrentThread.ManagedThreadId}";
+                try
+                {
+                    _file = $"Hello from thread {Thread.CurrentThread.ManagedThreadId}";
+                    Thread.Sleep(20000);
+                    return _file;
+                }
+                finally
+                {
+                    Monitor.Exit(_locker);
+                }      
+            }
+            else
+            {
+                Monitor.Wait(_locker); // todo: async wait
+                return _file;
             }
         }
 
