@@ -1,16 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using MultithreadingLongReading.Services;
 
 namespace MultithreadingLongReading.Controllers
 {
+    [Controller]
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        [Route("withoutlock")]
+        public IActionResult WithoutLock()
         {
-            return View();
+            var res = ReaderService.ReadFile();
+            return Ok(res);
+        }
+
+        [Route("withlock")]
+        public IActionResult WithLock()
+        {
+            var res = ReaderService.ReadFileWithLock();
+            return Ok(res);
+        }
+
+        [Route("monitor")]
+        public IActionResult Monitor()
+        {
+            var res = ReaderService.MonitorTest();
+            return Ok(res);
         }
     }
 }
